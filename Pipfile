@@ -1,0 +1,14 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+django-timedeltafield = "==0.7.2"
+Django = "==2.0.5"
+Sphinx = "*"
+
+[dev-packages]
+
+[requires]
+python_version = "3.8"

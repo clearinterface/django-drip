@@ -2,12 +2,16 @@ import sys
 
 from django.db import models
 from django.db.models import ForeignKey, OneToOneField, ManyToManyField
-from django.db.models.related import RelatedObject
+from django.db.models.fields.related import ForeignObjectRel
 
 # taking a nod from python-requests and skipping six
 _ver = sys.version_info
 is_py2 = (_ver[0] == 2)
 is_py3 = (_ver[0] == 3)
+
+
+basestring = None
+unicode = None
 
 if is_py2:
     basestring = basestring
@@ -66,7 +70,7 @@ def get_fields(Model,
     for field in fields:
         field_name = field.name
 
-        if isinstance(field, RelatedObject):
+        if isinstance(field, ForeignObjectRel):
             field_name = field.field.related_query_name()
 
         if parent_field:
@@ -82,9 +86,9 @@ def get_fields(Model,
 
         if not stop_recursion and \
                 (isinstance(field, ForeignKey) or isinstance(field, OneToOneField) or \
-                isinstance(field, RelatedObject) or isinstance(field, ManyToManyField)):
+                isinstance(field, ForeignObjectRel) or isinstance(field, ManyToManyField)):
 
-            if isinstance(field, RelatedObject):
+            if isinstance(field, ForeignObjectRel):
                 RelModel = field.model
                 #field_names.extend(get_fields(RelModel, full_field, True))
             else:
@@ -110,8 +114,10 @@ def give_model_field(full_field, Model):
 
     raise Exception('Field key `{0}` not found on `{1}`.'.format(full_field, Model.__name__))
 
+
 def get_simple_fields(Model, **kwargs):
     return [[f[0], f[3].__name__] for f in get_fields(Model, **kwargs)]
+
 
 def get_user_model():
     # handle 1.7 and back
@@ -121,3 +127,14 @@ def get_user_model():
     except ImportError:
         from django.contrib.auth.models import User
     return User
+
+
+def parse_time(value):
+    """
+    Check to make sure time string is not empty
+    """
+    value = value.strip()
+    if value == "":
+        raise TypeError(
+            "{0} is not a valid string".format(value)
+        )
